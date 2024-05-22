@@ -13,16 +13,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-import environ
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+from dotenv import load_dotenv
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+print('BASE_DIR:',BASE_DIR)
 
-SSO_FROENTEND_URL = env('SSO_FROENTEND_URL')
-SSO_BACKEND_URL = env('SSO_BACKEND_URL')
+SSO_FROENTEND_URL =  os.getenv('ENV_SSO_FROENTEND_URL')
+SSO_BACKEND_URL = os.getenv('ENV_SSO_BACKEND_URL')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
