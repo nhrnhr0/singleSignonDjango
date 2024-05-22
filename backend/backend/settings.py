@@ -14,10 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = os.path.join(BASE_DIR, '.env')
+print('ENV_FILE:',ENV_FILE)
+load_dotenv(ENV_FILE)
+
 print('BASE_DIR:',BASE_DIR)
 
 SSO_FROENTEND_URL =  os.getenv('ENV_SSO_FROENTEND_URL')
