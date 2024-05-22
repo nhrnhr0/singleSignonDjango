@@ -22,6 +22,8 @@ print('BASE_DIR:',BASE_DIR)
 
 SSO_FROENTEND_URL =  os.getenv('ENV_SSO_FROENTEND_URL')
 SSO_BACKEND_URL = os.getenv('ENV_SSO_BACKEND_URL')
+print('SSO_FROENTEND_URL:',SSO_FROENTEND_URL)
+print('SSO_BACKEND_URL:',SSO_BACKEND_URL)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
