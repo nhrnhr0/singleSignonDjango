@@ -52,7 +52,7 @@ export function auth_server_login(username, password) {
 
 
 
-export function network_register_screen(screen_id, screen_name) {
+export async function network_register_screen(screen_id, screen_name) {
     var raw = JSON.stringify({
         "screen_id": screen_id,
         "screen_name": screen_name
@@ -67,9 +67,7 @@ export function network_register_screen(screen_id, screen_name) {
         redirect: 'follow'
     };
 
-    return auth_server_fetch(`${AUTH_SERVER_URL}/register-screen/`, requestOptions);
-}
-
-export function network_get_standalog_server_url() {
-    return auth_server_fetch(`${AUTH_SERVER_URL}/get-standalog-server-url/`);
+    let resp = await auth_server_fetch(`${AUTH_SERVER_URL}/register-screen/`, requestOptions);
+    let json = await resp.json()
+    return [resp, json];
 }

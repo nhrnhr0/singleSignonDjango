@@ -2,7 +2,7 @@
 	import { protected_route } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { network_get_standalog_server_url, network_register_screen } from '$lib/network';
+	import { network_register_screen } from '$lib/network';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { browser } from '$app/environment';
 	import { auth_token } from '$lib/stores.js';
@@ -10,55 +10,30 @@
 	let screen_id = browser && $page.url.searchParams.get('screen_id');
 	let screen_name;
 	let submiting = false;
+	let error_msg = '';
+	protected_route();
 	onMount(() => {
 		console.log('onMount');
-		protected_route();
 	});
 
 	function submit(e) {
 		e.preventDefault();
 		console.log('submit');
-		network_register_screen(screen_id, screen_name)
-			.then((res) => {
-				console.log(res);
-				if (res.status === 200) {
-					alert('Screen activated');
-					// find the standalog server URL and redirect to it
-					network_get_standalog_server_url()
-						.then((res) => {
-							if (res.status === 200) {
-								res.json().then((data) => {
-									console.log(data);
-									debugger;
-									let auth_b64 = window.btoa(JSON.stringify($auth_token));
-									let auth_b64Safe = encodeURIComponent(auth_b64);
-									let url = `${data.url}/display/?screen_id=${screen_id}&auth_token=${auth_b64Safe}`;
-									console.log(url);
-									debugger;
-									window.location.href = url;
-								});
-							} else {
-								res.json().then((data) => {
-									debugger;
-									alert(data.detail);
-								});
-							}
-						})
-						.catch((err) => {
-							console.error(err);
-							alert('Error getting standalog server URL');
-						});
-				} else {
-					res.json().then((data) => {
-						debugger;
-						alert(data.detail);
-					});
-				}
-			})
-			.catch((err) => {
-				console.error(err);
-				alert('Error activating screen' + err);
-			});
+		network_register_screen(screen_id, screen_name).then(([res, json]) => {
+			// if res.status == 200 and json.status == 'success': redirect to redirect_to
+			// if res.status == 200 and json.status == 'error': show error message
+			// if res.status != 200: show error message
+			console.log(res);
+			console.log(json);
+
+			if (res.status === 200 && json.status === 'success') {
+				window.location.href = json.redirect_to;
+			} else {
+				console.log('error');
+				debugger;
+				error_msg = json.detail;
+			}
+		});
 	}
 </script>
 
@@ -84,5 +59,16 @@
 				Activate
 			{/if}
 		</button>
+		{#if error_msg}
+			<div class="error-msg">
+				{error_msg}
+			</div>
+		{/if}
 	</form>
 </div>
+
+<style lang="scss">
+	.error-msg {
+		color: red;
+	}
+</style>

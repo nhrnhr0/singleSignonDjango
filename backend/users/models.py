@@ -9,7 +9,8 @@ from rest_framework.authtoken.models import Token
 
 class Organization(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    domain = models.CharField(max_length=255)
+    frontend_domain = models.CharField(max_length=255)
+    backend_domain = models.CharField(max_length=255)
     
     def __str__(self) -> str:
         return self.name

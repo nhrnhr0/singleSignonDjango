@@ -33,8 +33,10 @@ SECRET_KEY = 'django-insecure-8bair_e#@)q^&7k0ui$il!oki92k*9lr@lq_e*@&az(5l264-$
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = [SSO_BACKEND_URL.split('//')[1],]
+ALLOWED_HOST = SSO_BACKEND_URL.split('//')[1]
+if ':' in ALLOWED_HOST:
+    ALLOWED_HOST = ALLOWED_HOST.split(':')[0]
+ALLOWED_HOSTS = [ALLOWED_HOST,]
 AUTH_USER_MODEL = 'users.User'
 
 # Application definition

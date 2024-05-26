@@ -3,14 +3,17 @@ import json
 from django.http import JsonResponse
 import uuid
 from rest_framework.decorators import permission_classes, api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from users.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 import requests
-
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from django.shortcuts import redirect
+from rest_framework.authtoken.models import Token
+import base64
+from urllib.parse import quote
 
 
 @api_view(['POST'])
@@ -25,7 +28,7 @@ def register_screen(request):
         # Check if the screen_id is already registered
         screen = User.objects.filter(username=f'screen_{screen_id}').first()
         if screen:
-            return JsonResponse({'detail': f'Screen {screen_id} already registered'}, status=400)
+            return JsonResponse({'status': 'error','detail': f'Screen {screen_id} already registered'}, status=400)
         
         
         # Register the screen (create a user with viwer permission)
@@ -38,13 +41,18 @@ def register_screen(request):
         screen.name = screen_name
         screen.save()
         
-        register_screen_at_standalog_server(screen_id,screen_name, org.domain, request.META.get("HTTP_AUTHORIZATION"))
+        register_screen_at_standalog_server(screen_id,screen_name, org.backend_domain, request.META.get("HTTP_AUTHORIZATION"))
         
         print(f'Screen {screen_id} registered to {user.username}')
-        return JsonResponse({'detail': f'Screen {screen_id} registered to {user.username}'})
+        
+        # redirect_to
+        redirect_to = org.frontend_domain + '/dashboard/screens/?id=' + screen_id + '&auth_token=' + encoded_auth_token(user)
+        
+        return JsonResponse({'status':'success', 'detail': f'Screen {screen_id} registered to {user.username}', 'redirect_to': redirect_to}, status=200)
     return render(request, 'register_screen.html')
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def get_screen_access(request):
     # if screen.credential_sent is False: set the password to UUID and send the credentials to the screen
     # if screen.credential_sent is True: send error message
@@ -68,24 +76,28 @@ def get_screen_access(request):
         screen.set_password(new_pass)
         screen.save()
         
-        return JsonResponse({'status': 'success', 'message': f'Credentials sent to screen {screen_id}', 'password': new_pass, 'username': screen.username}, status=200)
+        # need to create a 'redirect_to' with a url to the standalong server with the screen display
+        # <screen.organization>/display/?id=<screen.uuid>&auth_token=<auth_token>
+        # getting auth_token from api-token-auth
+        
+        redirect_to = screen.organization.frontend_domain + '/display?id=' + screen_id + '&auth_token=' + encoded_auth_token(screen)
+        
+        return JsonResponse({'status': 'success', 'message': f'Credentials sent to screen {screen_id}', 'redirect_to':redirect_to}, status=200)
     pass
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_standalog_server_url(request):
-    domain = request.user.organization.domain
-    return JsonResponse({'url': domain})
-    pass
-
+def encoded_auth_token(screen):
+    auth_token = Token.objects.get(user=screen).key
+    auth_b64 = base64.b64encode(json.dumps({'auth_token': auth_token}).encode()).decode()
+    auth_b64Safe = quote(auth_b64)
+    return auth_b64Safe
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_info(request):
     user = request.user
-    return JsonResponse({'username': user.username, 'domain': user.organization.domain, 'type': user.user_type})
+    return JsonResponse({'username': user.username, 'backend_domain': user.organization.backend_domain,'frontend_domain':  user.organization.frontend_domain, 'type': user.user_type})
     pass
 
 

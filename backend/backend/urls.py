@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from users.views import register_screen, get_screen_access, get_standalog_server_url,get_user_info
+from users.views import register_screen, get_screen_access,get_user_info
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
@@ -28,6 +28,5 @@ urlpatterns = [
     
     path('register-screen/', register_screen, name='register_screen'),
     path('get-screen-access/', get_screen_access, name='get_screen_access'),
-    path('get-standalog-server-url/', get_standalog_server_url, name='get_standalog_server_url'),
     
 ]

@@ -1,3 +1,4 @@
+import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { auth_token } from "./stores";
 import { get } from "svelte/store";
@@ -11,6 +12,9 @@ export function uuidv4() {
 
 
 export function protected_route() {
+    if (!browser) return;
+    let token = get(auth_token);
+    console.log('protected_route:', token);
     if (get(auth_token) == undefined || get(auth_token) == null || Object.keys(get(auth_token)).length == 0)
     {
         goto("/login?next=" + window.location.href);
