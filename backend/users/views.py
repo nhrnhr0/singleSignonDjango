@@ -88,7 +88,7 @@ def get_screen_access(request):
 
 def encoded_auth_token(screen):
     auth_token = Token.objects.get(user=screen).key
-    auth_b64 = base64.b64encode(json.dumps({'auth_token': auth_token}).encode()).decode()
+    auth_b64 = base64.b64encode(json.dumps({'token': auth_token}).encode()).decode()
     auth_b64Safe = quote(auth_b64)
     return auth_b64Safe
 

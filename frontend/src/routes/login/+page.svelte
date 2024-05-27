@@ -26,7 +26,6 @@
 
 				// navigate to the next page or home page
 				if (res.status === 200) {
-					alert('Login successful');
 					res.json().then((data) => {
 						auth_token.set(data);
 						debugger;
